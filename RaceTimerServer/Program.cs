@@ -2,6 +2,12 @@ using System.Net.WebSockets;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// DI registrations
+builder.Services.AddSingleton<WebSocketManager>();
+builder.Services.AddHttpClient();
+builder.Services.AddHostedService<PollingExternalFeed>();
+
 var app = builder.Build();
 
 // Enable WebSockets
@@ -11,51 +17,41 @@ var webSocketOptions = new WebSocketOptions
 };
 app.UseWebSockets(webSocketOptions);
 
-// Simulated race data
-var raceStartTime = DateTime.UtcNow;
+// Map websocket endpoint
+var wsManager = app.Services.GetRequiredService<WebSocketManager>();
 
 // Handle requests to WebSocket (/ws) 
 app.Map("/ws", async context =>
 {
-    // if request is a WebSocket request, establish connection
-    if (context.WebSockets.IsWebSocketRequest)
+    if (!context.WebSockets.IsWebSocketRequest)
     {
-        using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        Console.WriteLine("Client connected!");
-
-        await SendRaceUpdates(webSocket, raceStartTime);
-
-    }
-    else
-    {
-        // else return 400 error
         context.Response.StatusCode = 400;
+        return;
+    }
+
+    // establish connection with websocket and add it to list of clients
+    using var socket = await context.WebSockets.AcceptWebSocketAsync();
+    var id = wsManager.Add(socket);
+    Console.WriteLine($"Client connected: {id}");
+
+    // empty container to hold websocket data in
+    var buffer = new byte[4 * 1024];
+    
+    // try recieving message from websocket
+    try
+    {
+        // while websocket is open, recieve any messages
+        while (socket.State == WebSocketState.Open)
+        {
+            var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            if (result.MessageType == WebSocketMessageType.Close) break;
+        }
+    }
+    finally
+    {
+        await wsManager.RemoveAsync(id);
+        Console.WriteLine($"Client disconnected: {id}");
     }
 });
 
 app.Run();
-
-static async Task SendRaceUpdates(WebSocket webSocket, DateTime startTime)
-{
-    // Empty container to hold incoming data from the WebSocket
-    var buffer = new byte[1024 * 4];
-
-    while (webSocket.State == WebSocketState.Open)
-    {
-        // Calculate race time
-        var elapsed = DateTime.UtcNow - startTime;
-        var message = $"Elapsed Time: {elapsed.Minutes:D2}:{elapsed.Seconds:D2}.{elapsed.Milliseconds:D3}";
-
-        // Encode message to bytes
-        var bytes = Encoding.UTF8.GetBytes(message);
-
-        // Send to client
-        await webSocket.SendAsync(
-            new ArraySegment<byte>(bytes),
-            WebSocketMessageType.Text,
-            true,
-            CancellationToken.None);
-
-        await Task.Delay(1000); // Update every second
-    }
-}
