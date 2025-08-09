@@ -1,31 +1,48 @@
-// const timeDiv = document.getElementById('time');
-
-// Connect to WebSocket server
 const socket = new WebSocket("ws://localhost:5281/ws");
 
-// log once when socket openned
 socket.onopen = () => {
-    console.log("Connected to server");
+  console.log("Connected to server");
 };
 
-// Update the displayed time on every message recieved from server
-socket.onmessage = (event) => {
-    // timeDiv.textContent = event.data; 
-    try {
-        const msg = JSON.parse(event.data);
-        console.log(msg);
-    } catch (e) {
-        // server may send a raw text message
-        console.log('No data found');
+socket.onmessage = (evt) => {
+  try {
+    const msg = JSON.parse(evt.data);
+    if (msg.type === 'lapUpdate' && Array.isArray(msg.updates)) {
+      renderLeaderboard(msg.updates);
+    } else {
+      console.log('Unknown message', msg);
     }
+  } catch (e) {
+    // server may send a raw text message
+    console.log('Raw message', evt.data);
+  }
 };
 
-// log once when socket closed
-socket.onclose = () => {
-    // timeDiv.textContent = "Connection closed";
-};
+socket.onclose = () => console.log('Socket closed');
+socket.onerror = (err) => console.error('Socket error', err);
 
-// log any erros from socket
-socket.onerror = (error) => {
-    console.error("WebSocket Error: ", error);
-};
+function renderLeaderboard(updates) {
+  // sort by position to be safe
+  updates.sort((a, b) => a.position - b.position);
+
+  const container = document.getElementById('race-data');
+  const rows = updates.map(u => `
+    <tr>
+      <td>${u.position}</td>
+      <td>${u.driverId} - ${escapeHtml(u.name)}</td>
+      <td>${u.lap}</td>
+      <td>${u.lapTime ? u.lapTime.toFixed(3) : '-'}</td>
+      <td>${u.totalTime ? u.totalTime.toFixed(3) : '-'}</td>
+    </tr>
+  `).join('');
+  container.innerHTML = `
+    <table>
+      <thead><tr><th>#</th><th>Driver</th><th>Lap</th><th>Lap Time (s)</th><th>Total (s)</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function escapeHtml(s) {
+  return (s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
