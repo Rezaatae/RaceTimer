@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "46xVXcyeCoAIXH9LUjfIz3jcXbUiWhLQOUhE5hRX45s=",
+  "Source": "RaceTimerServer",
+  "BasePath": "_content/RaceTimerServer",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
