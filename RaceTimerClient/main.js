@@ -1,13 +1,5 @@
 const socket = new WebSocket("ws://localhost:5281/ws");
 
-const params = new URLSearchParams(window.location.search);
-const driverId = params.get('id');
-
-if (driverId) {
-  // fetch driver stats from your server or mock data
-  console.log('Show stats for', driverId);
-}
-
 socket.onopen = () => {
   console.log("Connected to server");
 };
@@ -35,6 +27,11 @@ function renderLeaderboard(updates) {
 
     updates.forEach(u => {
         const row = document.createElement("tr");
+        // Add Tailwind styles for hover/click
+        row.className = "cursor-pointer hover:bg-gray-700 transition-colors";
+        row.addEventListener("click", () => {
+            window.location.href = `driver.html?id=${encodeURIComponent(u.driverId)}`;
+        });
         row.innerHTML = `
             <td class="px-4 py-2">${u.position}</td>
             <td class="px-4 py-2">${u.driverId}</td>
