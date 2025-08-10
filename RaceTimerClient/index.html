@@ -1,9 +1,22 @@
 <!doctype html>
 <html>
-<head><meta charset="utf-8"><title>Race Timer</title></head>
+<head><meta charset="utf-8"><title>Race Timer</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
 <body>
-  <h1>Live Race Timer</h1>
-  <div id="race-data">Waiting for data...</div>
+  <h1 class="text-3xl font-bold mb-4">🏎 Live Race Timing</h1>
+  <table class="table-auto w-full text-left border-collapse">
+    <thead>
+      <tr>
+        <th class="px-4 py-2">Pos</th>
+        <th class="px-4 py-2">Driver</th>
+        <th class="px-4 py-2">Lap Time</th>
+        <th class="px-4 py-2">Gap</th>
+      </tr>
+    </thead>
+    <tbody id="race-table">
+    </tbody>
+  </table>
   <script src="main.js"></script>
 </body>
 </html>

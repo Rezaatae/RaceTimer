@@ -17,7 +17,7 @@ public class PollingExternalFeed : BackgroundService
         _httpFactory = httpFactory;
         _wsManager = wsManager;
         _logger = logger;
-        _url = config["ExternalFeed:Url"] ?? "http://localhost:4000/current";
+        _url = "http://localhost:4000/current";
         _pollMs = 800;
     }
 

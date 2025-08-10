@@ -1,5 +1,13 @@
 const socket = new WebSocket("ws://localhost:5281/ws");
 
+const params = new URLSearchParams(window.location.search);
+const driverId = params.get('id');
+
+if (driverId) {
+  // fetch driver stats from your server or mock data
+  console.log('Show stats for', driverId);
+}
+
 socket.onopen = () => {
   console.log("Connected to server");
 };
@@ -22,25 +30,20 @@ socket.onclose = () => console.log('Socket closed');
 socket.onerror = (err) => console.error('Socket error', err);
 
 function renderLeaderboard(updates) {
-  // sort by position to be safe
-  updates.sort((a, b) => a.position - b.position);
+  const tableBody = document.getElementById("race-table");
+    tableBody.innerHTML = "";
 
-  const container = document.getElementById('race-data');
-  const rows = updates.map(u => `
-    <tr>
-      <td>${u.position}</td>
-      <td>${u.driverId} - ${escapeHtml(u.name)}</td>
-      <td>${u.lap}</td>
-      <td>${u.lapTime ? u.lapTime.toFixed(3) : '-'}</td>
-      <td>${u.totalTime ? u.totalTime.toFixed(3) : '-'}</td>
-    </tr>
-  `).join('');
-  container.innerHTML = `
-    <table>
-      <thead><tr><th>#</th><th>Driver</th><th>Lap</th><th>Lap Time (s)</th><th>Total (s)</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
+    updates.forEach(u => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td class="px-4 py-2">${u.position}</td>
+            <td class="px-4 py-2">${u.driverId}</td>
+            <td class="px-4 py-2">${u.lap}</td>
+            <td class="px-4 py-2">${u.lapTime ? u.lapTime.toFixed(3) : '-'}</td>
+            <td class="px-4 py-2">${u.totalTime ? u.totalTime.toFixed(3) : '-'}</td>
+        `;
+        tableBody.appendChild(row);
+    });
 }
 
 function escapeHtml(s) {
