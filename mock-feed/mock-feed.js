@@ -14,6 +14,8 @@ const drivers = [
   { id: 'PER', name: 'Sergio Perez', lap: 0, lastLapTime: 0, totalTime: 0 }
 ];
 
+const problemsList = ["Engine overheating", "Tire puncture", "Gearbox issue", "Brake failure", null];
+
 
 let lastSnapshot = makeSnapshot();
 
@@ -25,6 +27,8 @@ function randomLapTime(base = 70, variance = 3) {
 function updateState() {
   // pick 1-2 drivers to complete a lap per tick (simulate staggered laps)
   const numUpdates = 1 + Math.floor(Math.random() * 2);
+  const problem = problemsList.filter(p => Math.random() < 0.1 && p); // ~10% chance per problem
+
   for (let i = 0; i < numUpdates; i++) {
     const d = drivers[Math.floor(Math.random() * drivers.length)];
     const lapTime = randomLapTime(70, 4);
@@ -32,6 +36,7 @@ function updateState() {
     d.lastLapTime = lapTime;
     d.totalTime = +(d.totalTime + lapTime).toFixed(3);
   }
+  
   // recompute positions by totalTime (lower totalTime => better position)
   drivers.sort((a, b) => a.totalTime - b.totalTime);
   const updates = drivers.map((d, idx) => ({
@@ -41,7 +46,8 @@ function updateState() {
     lapTime: d.lastLapTime,
     totalTime: d.totalTime,
     position: idx + 1,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    problems: problem
   }));
 
   lastSnapshot = { type: 'lapUpdate', updates };

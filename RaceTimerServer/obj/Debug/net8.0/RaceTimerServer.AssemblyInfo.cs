@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RaceTimerServer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fc3c1c8c793b02c9b06fe56f5b66655664d871e0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+010055aa4719979fa72b875d345b6203750a7379")]
 [assembly: System.Reflection.AssemblyProductAttribute("RaceTimerServer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RaceTimerServer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

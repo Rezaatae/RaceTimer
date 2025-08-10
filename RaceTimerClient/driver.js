@@ -1,6 +1,7 @@
 const socket = new WebSocket("ws://localhost:5281/ws");
 
 const driverId = params.get('id');
+const problemsStr = params.get('problems');
 
 if (driverId) {
   // fetch driver stats from your server or mock data
@@ -11,7 +12,8 @@ socket.onmessage = (evt) => {
   try {
     const msg = JSON.parse(evt.data);
     if (msg.type === 'lapUpdate' && Array.isArray(msg.updates)) {
-      renderDriverTable(msg.updates);
+        renderDriverTable(msg.updates);
+        renderProblemsTable(msg.updates);
     } else {
       console.log('Unknown message', msg);
     }
@@ -35,6 +37,26 @@ function renderDriverTable(updates) {
             tableBody.appendChild(row);
         }
     });
+}
+
+function renderProblemsTable(updates) {
+  const tableBody = document.getElementById("problems-table");
+  tableBody.innerHTML = "";
+  const localProbList = problemsStr.split(",");
+  updates.forEach(u =>{
+    if (u.driverId == driverId && u.problems){
+        localProbList.push(u.problems)
+        }
+  })
+  localProbList.forEach(problem => {
+    if(problem){
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        <td class="px-4 py-2 border-b border-gray-600">${problem}</td>
+        `;
+        tableBody.appendChild(row);
+    }
+  });
 }
 
 
